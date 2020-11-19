@@ -1,0 +1,1 @@
+print "\xAC\xED\x00\x05\x00\x0A".decode('utf-8')

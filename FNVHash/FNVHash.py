@@ -3,6 +3,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import random
 
+
 class HashResult:
     def __init__(self):
         self.coverage = 0
@@ -10,6 +11,7 @@ class HashResult:
         self.max_collisions = 0
         self.total_collisions = 0
         self.distribution = {}
+
 
 def standard_fnv(key):
     FNV_PRIME = 0x01000193
@@ -21,6 +23,7 @@ def standard_fnv(key):
         hash_value *= FNV_PRIME
     return hash_value & 0x7FFFFFFF
 
+
 def non_prime_fnv(key):
     NON_PRIME = 0x01000190
     OFFSET_BASIS = 0x7ee36237
@@ -30,6 +33,7 @@ def non_prime_fnv(key):
         hash_value ^= ord(c)
         hash_value *= NON_PRIME
     return hash_value & 0x7FFFFFFF
+
 
 def calculate_metrics(test_data, is_standard, bucket_size):
     result = HashResult()
@@ -47,6 +51,7 @@ def calculate_metrics(test_data, is_standard, bucket_size):
 
     return result
 
+
 def create_and_show_charts(test_data, bucket_sizes):
     coverage_data = []
     collisions_data = []
@@ -61,13 +66,13 @@ def create_and_show_charts(test_data, bucket_sizes):
         coverage_data.append({'Bucket Size': bucket_size, 'Hash Type': 'Non-Prime FNV', 'Coverage': non_prime_result.coverage})
 
         collisions_data.append({'Bucket Size': bucket_size, 'Hash Type': 'Standard FNV', 'Avg Collisions': standard_result.avg_collisions})
-        collisions_data.append({'Bucket Size': bucket_size, 'Hash Type': 'Non-Prime FNV', 'Avg Collisions': non_prime_result.avg_collisions})
+        collisions_data.append({'Bucket Size': bucket_size, 'Hash Type': 'Non-Prime FNV','Avg Collisions': non_prime_result.avg_collisions})
 
         max_collisions_data.append({'Bucket Size': bucket_size, 'Hash Type': 'Standard FNV', 'Max Collisions': standard_result.max_collisions})
-        max_collisions_data.append({'Bucket Size': bucket_size, 'Hash Type': 'Non-Prime FNV', 'Max Collisions': non_prime_result.max_collisions})
+        max_collisions_data.append({'Bucket Size': bucket_size, 'Hash Type': 'Non-Prime FNV','Max Collisions': non_prime_result.max_collisions})
 
-        total_collisions_data.append({'Bucket Size': bucket_size, 'Hash Type': 'Standard FNV', 'Total Collisions': standard_result.total_collisions})
-        total_collisions_data.append({'Bucket Size': bucket_size, 'Hash Type': 'Non-Prime FNV', 'Total Collisions': non_prime_result.total_collisions})
+        total_collisions_data.append({'Bucket Size': bucket_size, 'Hash Type': 'Standard FNV','Total Collisions': standard_result.total_collisions})
+        total_collisions_data.append({'Bucket Size': bucket_size, 'Hash Type': 'Non-Prime FNV','Total Collisions': non_prime_result.total_collisions})
 
     # 转换为 DataFrame
     coverage_df = pd.DataFrame(coverage_data)
@@ -76,26 +81,45 @@ def create_and_show_charts(test_data, bucket_sizes):
     total_collisions_df = pd.DataFrame(total_collisions_data)
 
     # 创建图表
-    plt.figure(figsize=(12, 10))
+    plt.figure(figsize=(12, 8))
+
+    # 添加整体标题，包含数据集大小
+    dataset_size = len(test_data)
+    plt.suptitle(f'FNV-1a Hash Performance Metrics (Dataset Size: {dataset_size})', fontsize=16)
+
+    # 定义一个函数来添加数值标签
+    def add_value_labels(bars):
+        for bar in bars:
+            yval = bar.get_height()
+            if yval > 0:  # 仅在值大于0时添加标签
+                plt.text(bar.get_x() + bar.get_width() / 2, yval, round(yval, 2), ha='center', va='bottom')
 
     plt.subplot(2, 2, 1)
-    sns.barplot(data=coverage_df, x='Bucket Size', y='Coverage', hue='Hash Type')
+    bars = sns.barplot(data=coverage_df, x='Bucket Size', y='Coverage', hue='Hash Type')
     plt.title('Coverage (%)')
+    add_value_labels(bars.patches)
 
     plt.subplot(2, 2, 2)
-    sns.barplot(data=collisions_df, x='Bucket Size', y='Avg Collisions', hue='Hash Type')
+    bars = sns.barplot(data=collisions_df, x='Bucket Size', y='Avg Collisions', hue='Hash Type')
     plt.title('Average Collisions')
+    add_value_labels(bars.patches)
 
     plt.subplot(2, 2, 3)
-    sns.barplot(data=max_collisions_df, x='Bucket Size', y='Max Collisions', hue='Hash Type')
+    bars = sns.barplot(data=max_collisions_df, x='Bucket Size', y='Max Collisions', hue='Hash Type')
     plt.title('Max Collisions')
+    add_value_labels(bars.patches)
 
     plt.subplot(2, 2, 4)
-    sns.barplot(data=total_collisions_df, x='Bucket Size', y='Total Collisions', hue='Hash Type')
+    bars = sns.barplot(data=total_collisions_df, x='Bucket Size', y='Total Collisions', hue='Hash Type')
     plt.title('Total Collisions')
+    add_value_labels(bars.patches)
+
+    # 调整子图之间的间距
+    plt.subplots_adjust(top=0.9, hspace=0.4, wspace=0.3)
 
     plt.tight_layout()
     plt.show()
+
 
 def main():
     # 生成测试数据
@@ -121,6 +145,7 @@ def main():
 
     # 创建并显示图表
     create_and_show_charts(test_data, bucket_sizes)
+
 
 if __name__ == "__main__":
     main()
